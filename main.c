@@ -1,6 +1,6 @@
 #ifndef LEXER_H
 #define LEXER_H
-#include "lexer.h"
+#include "lexer/lexer.h"
 #endif
 
 #ifndef STDIO_H

@@ -23,35 +23,28 @@
 #include <stdio.h>
 #endif
 
-typedef struct {
-    uint32_t line;
-    uint32_t column;
-} POINT;
+#ifndef ARRAY_H
+#define ARRAY_H
+#include "../array.h"
+#endif
 
-typedef struct {
-    uint8_t code;
-    void    *value;
-    POINT   position;
-} TOKEN;
+#ifndef TOKEN_H
+#define TOKEN_H
+#include "token.h"
+#endif
 
-typedef enum {
-    LEXICAL_ERROR_NO_ERROR,
-    LEXICAL_ERROR_NUMBER_EXPECTED,
-    LEXICAL_ERROR_POSITIVE_NUMBER_EXPECTED,
-} LEXICAL_ERROR;
+#ifndef ERROR_H
+#define ERROR_H
+#include "error.h"
+#endif
 
+// Texto do código
 char *text;
-POINT current = {1, 1};
-
-void throw_error(LEXICAL_ERROR error) {
-    printf("ERROR: %d\n", error);
-}
 
 // Verifica se é um caractere de espaçamento
 bool is_blank(const char str) {
     return str == ' ';
 }
-
 
 // Verifica se é um caractere de nova linha
 bool is_lf(const char str) {
@@ -68,19 +61,20 @@ bool is_ending_char(const char str) {
     return is_etx(str) || is_lf(str) || is_blank(str);
 }
 
+// Avança até a próxima token
 void advance() {
     while(is_blank(*text)) {
         text++;
-        current.column++;
+        cursor.column++;
     }
     while(!is_ending_char(*text)) {
         text++;
-        current.column++;
+        cursor.column++;
     }
 }
 
 // Verifica se é uma sequência numérica válida
-bool is_number(char *str, bool positiveOnly) {
+bool is_number(char *str) {
     bool isNumber = false;
     bool hasMinus = *str == '-';
     if(hasMinus) str++;
@@ -88,10 +82,6 @@ bool is_number(char *str, bool positiveOnly) {
         if(*str < '0' || *str > '9') return false;
         else isNumber = true;
         str++;
-    }
-    if(isNumber && hasMinus && positiveOnly) {
-        throw_error(LEXICAL_ERROR_POSITIVE_NUMBER_EXPECTED);
-        return false;
     }
     return isNumber;
 }
@@ -111,17 +101,22 @@ uint32_t get_number(char *str) {
     return number * (hasMinus ? -1 : 1);
 }
 
+// Executa a análise léxica no código
 TOKEN *parse(char *t) {
+    tokens = new_array(sizeof(TOKEN));
+    lexicalErrors = new_array(sizeof(LEXICAL_ERROR));
+
     text = t;
     bool newLine = true;
+    
     while(*text) {
         while(is_blank(*text)) advance();
         if(newLine) {
+            uint32_t num = get_number(text);
+            add_token(TOKEN_CODE_NUM, num);
             if(is_number(text, true)) {
-                
-            } else {
-               throw_error(LEXICAL_ERROR_NUMBER_EXPECTED);
-            }
+                if(num < 0) throw_lexical_error(LEXICAL_ERROR_CODE_NAN);
+            } else throw_lexical_error(LEXICAL_ERROR_CODE_NAPN);
             newLine = false;
             advance();
         }
