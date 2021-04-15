@@ -10,8 +10,8 @@
 
 int main(int argc, char **argv) {
     // Aloca arrays de tokens e erros
-    tokens = new_array(sizeof(TOKEN));
-    lexicalErrors = new_array(sizeof(LEXICAL_ERROR));
+    tokens = new_array();
+    lexicalErrors = new_array();
     // Buffer de leitura
     char buffer[1024];
     
@@ -22,7 +22,12 @@ int main(int argc, char **argv) {
     while(fgets(buffer, 1024, f)) parse(buffer);
 
     for(uint32_t i = 0; i < tokens->length; i++) {
-        TOKEN t = *((TOKEN*)(tokens->buffer + i));
-        printf("%u, %li, (%u, %u)\n", t.code, t.value, t.position.line, t.position.column);
+        TOKEN *t = tokens->buffer[i];
+        printf("%.2u, %.4li, (%u, %u)\n", t->code, t->value, t->position.line, t->position.column);
+    }
+
+    for(uint32_t i = 0; i < lexicalErrors->length; i++) {
+        LEXICAL_ERROR *l = lexicalErrors->buffer[i];
+        printf("%u, (%u, %u)\n", l->code, l->position.column, l->position.line);
     }
 }

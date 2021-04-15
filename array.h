@@ -22,18 +22,16 @@
 // Estrutura de array dinâmica
 typedef struct {
     void **buffer;
-    uint8_t size;
     uint32_t length;
     uint32_t capacity;
 } ARRAY;
 
 // Instancia uma nova array dinâmica
-ARRAY *new_array(uint8_t size) {
+ARRAY *new_array() {
     ARRAY *arr = malloc(sizeof(ARRAY));
-    arr->buffer = NULL;
-    arr->size = size;
+    arr->buffer = malloc(sizeof(void*));
     arr->length = 0;
-    arr->capacity = 0;
+    arr->capacity = 1;
     return arr;
 }
 
@@ -42,18 +40,17 @@ bool push(ARRAY *arr, void *item) {
     if(!arr) return false;
     if(arr->length == arr->capacity) {
         arr->capacity *= 2;
-        void **buffer = malloc(arr->capacity * arr->size);
-        if(arr->buffer) memcpy(buffer, arr->buffer, arr->length * arr->size);
+        void **buffer = malloc(arr->capacity * sizeof(void*));
+        memcpy(buffer, arr->buffer, arr->length * sizeof(void*));
         free(arr->buffer);
         arr->buffer = buffer;
     }
-    memcpy(arr->buffer + arr->length * arr->size, item, arr->size);
-    arr->length++;
+    arr->buffer[arr->length++] = item;
     return true;
 }
 
 // Retorna o último item da array
 void *pop(ARRAY *arr) {
     if(!arr || !arr->length) return NULL;
-    return (arr->buffer)[(arr->length - 1) * arr->size];
+    return (arr->buffer)[(arr->length - 1) * sizeof(void*)];
 }
