@@ -10,14 +10,19 @@
 
 // Códigos de erros
 typedef enum {
+    LEXICAL_ERROR_CODE_UNKN,
     LEXICAL_ERROR_CODE_NAN,
     LEXICAL_ERROR_CODE_NAPN,
+    LEXICAL_ERROR_CODE_NAW,
+    LEXICAL_ERROR_CODE_NO_INDEX,
+    LEXICAL_ERROR_CODE_REPEATED_INDEX,
+    LEXICAL_ERROR_CODE_SMALLER_INDEX,
 } LEXICAL_ERROR_CODE;
 
 // Erro léxico
 typedef struct {
     LEXICAL_ERROR_CODE code;
-    TOKEN *token;
+    POINT position;
 } LEXICAL_ERROR;
 
 // Lista de erros
@@ -27,6 +32,6 @@ ARRAY *lexicalErrors = NULL;
 void throw_lexical_error(LEXICAL_ERROR_CODE code) {
     LEXICAL_ERROR *e = malloc(sizeof(LEXICAL_ERROR));
     e->code = code;
-    e->token = (TOKEN*)pop(tokens);
+    e->position = cursor;
     push(lexicalErrors, e);
 }

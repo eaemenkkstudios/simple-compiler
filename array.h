@@ -13,6 +13,12 @@
 #include <stdbool.h>
 #endif
 
+#ifndef STRING_H
+#define STRING_H
+#include <string.h>
+#endif
+
+
 // Estrutura de array dinâmica
 typedef struct {
     void **buffer;
@@ -37,13 +43,11 @@ bool push(ARRAY *arr, void *item) {
     if(arr->length == arr->capacity) {
         arr->capacity *= 2;
         void *buffer = malloc(arr->capacity * arr->size);
-        for(uint32_t i = 0; i < arr->length; i++)
-            ((uint8_t*)buffer)[i] = ((uint8_t*)arr->buffer)[i];
+        memcpy(buffer, arr->buffer, arr->length * arr->size);
         free(arr->buffer);
         *arr->buffer = buffer;
     }
-    for(uint32_t i = 0; i < arr->length; i++)
-        ((uint8_t*)arr->buffer)[arr->length * arr->size + i] = ((uint8_t*)item)[i];
+    memcpy(arr->buffer + arr->length * arr->size, item, arr->size);
     arr->length++;
     return true;
 }

@@ -26,6 +26,7 @@ typedef struct {
 
 // Classe de token
 typedef enum {
+    TOKEN_CODE_UNKN = 0,
     TOKEN_CODE_ETX  = 3,
     TOKEN_CODE_LF   = 10,
     TOKEN_CODE_SET,
@@ -54,7 +55,7 @@ typedef enum {
 // Token
 typedef struct {
     TOKEN_CODE  code;
-    uint8_t     value;
+    int64_t    value;
     POINT       position;
 } TOKEN;
 
@@ -64,10 +65,19 @@ POINT cursor = {1, 1};
 ARRAY *tokens = NULL;
 
 // Instancia uma token e adiciona à array
-void add_token(TOKEN_CODE code, uint8_t value) {
+bool push_token(TOKEN_CODE code) {
+    if(code == TOKEN_CODE_UNKN) return false;
     TOKEN *t = malloc(sizeof(TOKEN));
     t->code = code;
     t->position = cursor;
+    t->value = 0;
+    return push(tokens, t);
+}
+
+// Preenche o valor da token do topo da array
+bool fill_token(int64_t value) {
+    TOKEN *t = pop(tokens);
+    if(!t) return false;
     t->value = value;
-    push(tokens, t);
+    return true;
 }

@@ -11,6 +11,6 @@
 int main() {
     char num[1024];
     scanf("%s", num);
-    printf("Is number? %s\n", is_number(num, false) ? "true" : "false");
+    printf("Is number? %s\n", is_number(num) ? "true" : "false");
     printf("Number: %i\n", get_number(num));
 }
