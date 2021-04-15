@@ -1,0 +1,8 @@
+1000 rem Encontrar o maior de dois inteiros
+1100 input x
+1200 input y
+1300 if x < y goto 2000
+1400 print x
+1500 goto 3000
+2000 print y
+3000 end

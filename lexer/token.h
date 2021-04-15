@@ -78,6 +78,7 @@ bool push_token(TOKEN_CODE code) {
 bool fill_token(int64_t value) {
     TOKEN *t = pop(tokens);
     if(!t) return false;
+    printf("asd %u\n", (*t).code);
     t->value = value;
     return true;
 }

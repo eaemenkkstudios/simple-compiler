@@ -42,10 +42,10 @@ bool push(ARRAY *arr, void *item) {
     if(!arr) return false;
     if(arr->length == arr->capacity) {
         arr->capacity *= 2;
-        void *buffer = malloc(arr->capacity * arr->size);
-        memcpy(buffer, arr->buffer, arr->length * arr->size);
+        void **buffer = malloc(arr->capacity * arr->size);
+        if(arr->buffer) memcpy(buffer, arr->buffer, arr->length * arr->size);
         free(arr->buffer);
-        *arr->buffer = buffer;
+        arr->buffer = buffer;
     }
     memcpy(arr->buffer + arr->length * arr->size, item, arr->size);
     arr->length++;
@@ -54,6 +54,6 @@ bool push(ARRAY *arr, void *item) {
 
 // Retorna o último item da array
 void *pop(ARRAY *arr) {
-    if(!arr) return NULL;
-    return ((void**)arr->buffer)[(arr->length - 1) *  arr->size];
+    if(!arr || !arr->length) return NULL;
+    return (arr->buffer)[(arr->length - 1) * arr->size];
 }

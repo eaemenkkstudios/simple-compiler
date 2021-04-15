@@ -43,9 +43,6 @@
 #include <string.h>
 #endif
 
-// Texto do código
-char *text;
-
 // Tipo de número
 typedef enum {
     NUM_TYPE_NAN,
@@ -79,19 +76,19 @@ bool is_letter_char(char str) {
 }
 
 // Avança ao próximo caractere
-void next() {
-    text++;
+void next(char **str) {
+    *(str)++;
     cursor.column++;
 }
 
 // Avança até a próxima token
-void advance_token() {
-    while(!is_ending_char(*text)) next();
+void advance_token(char **str) {
+    while(!is_ending_char(**str)) next(str);
 }
 
 // Avança espaços em branco
-void advance_blank() {
-    while(is_blank(*text)) next();
+void advance_blank(char **str) {
+    while(is_blank(**str)) next(str);
 }
 
 // Verifica se é uma sequência numérica válida
@@ -127,16 +124,11 @@ bool is_var(char *str) {
 }
 
 // Executa a análise léxica no código
-TOKEN *parse(char *t) {
-    // Aloca arrays de tokens e erros
-    tokens = new_array(sizeof(TOKEN));
-    lexicalErrors = new_array(sizeof(LEXICAL_ERROR));
-    text = t;
-    
+void *parse(char *text) {
     // Lê token a token
-    while(*text) {
+    while(true) {
         // Pula espaços em branco
-        advance_blank();
+        while(is_blank(*text)) next(&text);
 
         // Lê token individualmente
         uint32_t i = 0;
@@ -150,11 +142,20 @@ TOKEN *parse(char *t) {
         if(num == NUM_TYPE_NUM) {
                                                 push_token(TOKEN_CODE_NUM);
                                                 fill_token(atoi(token));
+        printf("asd %s\n", token);
         } else if (num == NUM_TYPE_INVALID)     throw_lexical_error(LEXICAL_ERROR_CODE_INVALID_NUMBER);
-        // Checa se token é caractere especial
-        else if(token[0] == '\n')               push_token(TOKEN_CODE_LF);
+        // Checa se token é quebra de linha
+        else if(token[0] == '\n') {
+                                                push_token(TOKEN_CODE_LF);
+                                                cursor.line++;
+                                                break;
+        }
+        // Checa se token é fim de arquivo
         else if(token[0] == '\0'
-            || token[0] == '\x03')              push_token(TOKEN_CODE_ETX);
+            || token[0] == '\x03') {
+                                                push_token(TOKEN_CODE_ETX);
+                                                break;
+        }
         // Checa se token é variável
         if(is_var(token)) {
                                                 push_token(TOKEN_CODE_VAR);
@@ -162,7 +163,10 @@ TOKEN *parse(char *t) {
         }
         // Checa se token é palavra reservada
         else if(is_word(token)) {
-            if(!strcmp(token, "rem"))           push_token(TOKEN_CODE_REM);
+            if(!strcmp(token, "rem")) {
+                                                push_token(TOKEN_CODE_REM);
+                                                while(!is_etx(*text) && !is_lf(*text)) next(&text);
+            }
             else if (!strcmp(token, "input"))   push_token(TOKEN_CODE_IN);
             else if (!strcmp(token, "let"))     push_token(TOKEN_CODE_LET);
             else if (!strcmp(token, "print"))   push_token(TOKEN_CODE_OUT);
@@ -189,6 +193,6 @@ TOKEN *parse(char *t) {
         free(token);
 
         // Avança para a próxima token
-        advance_token();
+        while(!is_ending_char(*text)) next(&text);
     }
 }
