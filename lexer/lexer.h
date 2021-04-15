@@ -33,8 +33,8 @@
 #include "token.h"
 #endif
 
-#ifndef ERROR_H
-#define ERROR_H
+#ifndef LEXICAL_ERROR_H
+#define LEXICAL_ERROR_H
 #include "error.h"
 #endif
 
@@ -45,6 +45,13 @@
 
 // Texto do código
 char *text;
+
+// Tipo de número
+typedef enum {
+    NUM_TYPE_NAN,
+    NUM_TYPE_INVALID,
+    NUM_TYPE_NUM
+} NUM_TYPE;
 
 // Verifica se é um caractere de espaçamento
 bool is_blank(char str) {
@@ -78,25 +85,29 @@ void next() {
 }
 
 // Avança até a próxima token
-void advance(bool hardAdvance) {
-    if(hardAdvance) while(!is_ending_char(*text)) text++;
+void advance_token() {
+    while(!is_ending_char(*text)) next();
+}
+
+// Avança espaços em branco
+void advance_blank() {
     while(is_blank(*text)) next();
 }
 
 // Verifica se é uma sequência numérica válida
-bool is_number(char *str) {
+NUM_TYPE is_number(char *str) {
     bool isNumber = false;
     bool hasMinus = *str == '-';
     if(hasMinus) str++;
     while(!is_ending_char(*str)) {
         if(*str < '0' || *str > '9') {
-            if(isNumber) throw_lexical_error(LEXICAL_ERROR_CODE_NAN);
-            return false;
+            if(isNumber) return NUM_TYPE_INVALID;
+            return NUM_TYPE_NAN;
         }
         else isNumber = true;
         str++;
     }
-    return isNumber;
+    return NUM_TYPE_NUM;
 }
 
 // Verifica se é uma sequência de letras válida
@@ -115,64 +126,69 @@ bool is_var(char *str) {
     return is_letter_char(*str) && is_ending_char(str[1]);
 }
 
-// Obtém código da token
-TOKEN_CODE get_code(char *str) {
-    uint32_t i = 0;
-    while(!is_ending_char(str[i])) i++;
-    char *token = malloc(sizeof(char) * (i + 1));
-    for(uint32_t j = 0; j < i; j++) token[j] = str[j];
-    token[i] = '\0';
-
-    TOKEN_CODE                          code = TOKEN_CODE_UNKN;
-    if(is_var(str))                     code = TOKEN_CODE_VAR;
-    else if(is_word(str)) {
-        if(!strcmp(str, "rem"))         code = TOKEN_CODE_REM;
-        else if (!strcmp(str, "input")) code = TOKEN_CODE_IN;
-        else if (!strcmp(str, "let"))   code = TOKEN_CODE_LET;
-        else if (!strcmp(str, "print")) code = TOKEN_CODE_OUT;
-        else if (!strcmp(str, "goto"))  code = TOKEN_CODE_GOTO;
-        else if (!strcmp(str, "if"))    code = TOKEN_CODE_IF;
-        else if (!strcmp(str, "end"))   code = TOKEN_CODE_END;
-        else                            throw_lexical_error(LEXICAL_ERROR_CODE_NAW);
-    } else if(is_number(str))           code = TOKEN_CODE_NUM;
-    else if(!strcmp(str, "="))          code = TOKEN_CODE_SET;
-    else if(!strcmp(str, "+"))          code = TOKEN_CODE_ADD;
-    else if(!strcmp(str, "-"))          code = TOKEN_CODE_SUB;
-    else if(!strcmp(str, "*"))          code = TOKEN_CODE_SET;
-    else if(!strcmp(str, "/"))          code = TOKEN_CODE_DIV;
-    else if(!strcmp(str, "%"))          code = TOKEN_CODE_MOD;
-    else if(!strcmp(str, "=="))         code = TOKEN_CODE_EQU;
-    else if(!strcmp(str, "!="))         code = TOKEN_CODE_NEQU;
-    else if(!strcmp(str, ">"))          code = TOKEN_CODE_GT;
-    else if(!strcmp(str, "<"))          code = TOKEN_CODE_LT;
-    else if(!strcmp(str, ">="))         code = TOKEN_CODE_GTE;
-    else if(!strcmp(str, "<="))         code = TOKEN_CODE_LTE;
-    free(token);
-    return code;
-}
-
-// Valida o índice de linha
-void check_index(int64_t *lastLine) {
-    TOKEN_CODE code;
-    push_token(code = get_code(text));
-    if(code == TOKEN_CODE_NUM) {
-        int64_t val = atoi(text);
-        fill_token(val);
-        if(val < 0) throw_lexical_error(LEXICAL_ERROR_CODE_NAPN);
-        else if(val == lastLine) throw_lexical_error(LEXICAL_ERROR_CODE_REPEATED_INDEX);
-        else if(val < lastLine) throw_lexical_error(LEXICAL_ERROR_CODE_SMALLER_INDEX);
-    } else throw_lexical_error(LEXICAL_ERROR_CODE_NO_INDEX);
-}
-
 // Executa a análise léxica no código
 TOKEN *parse(char *t) {
+    // Aloca arrays de tokens e erros
     tokens = new_array(sizeof(TOKEN));
     lexicalErrors = new_array(sizeof(LEXICAL_ERROR));
     text = t;
-    int64_t lastLine = -1;
+    
+    // Lê token a token
     while(*text) {
-        advance(false);
-        check_index(&lastLine);
-        advance(true);
+        // Pula espaços em branco
+        advance_blank();
+
+        // Lê token individualmente
+        uint32_t i = 0;
+        while(!is_ending_char(text[i])) i++;
+        char *token = malloc(sizeof(char) * (i + 1));
+        for(uint32_t j = 0; j < i; j++) token[j] = text[j];
+        token[i] = '\0';
+
+        // Checa se token é um número
+        NUM_TYPE num = is_number(token);
+        if(num == NUM_TYPE_NUM) {
+                                                push_token(TOKEN_CODE_NUM);
+                                                fill_token(atoi(token));
+        } else if (num == NUM_TYPE_INVALID)     throw_lexical_error(LEXICAL_ERROR_CODE_INVALID_NUMBER);
+        // Checa se token é caractere especial
+        else if(token[0] == '\n')               push_token(TOKEN_CODE_LF);
+        else if(token[0] == '\0'
+            || token[0] == '\x03')              push_token(TOKEN_CODE_ETX);
+        // Checa se token é variável
+        if(is_var(token)) {
+                                                push_token(TOKEN_CODE_VAR);
+                                                fill_token(token[0]);
+        }
+        // Checa se token é palavra reservada
+        else if(is_word(token)) {
+            if(!strcmp(token, "rem"))           push_token(TOKEN_CODE_REM);
+            else if (!strcmp(token, "input"))   push_token(TOKEN_CODE_IN);
+            else if (!strcmp(token, "let"))     push_token(TOKEN_CODE_LET);
+            else if (!strcmp(token, "print"))   push_token(TOKEN_CODE_OUT);
+            else if (!strcmp(token, "goto"))    push_token(TOKEN_CODE_GOTO);
+            else if (!strcmp(token, "if"))      push_token(TOKEN_CODE_IF);
+            else if (!strcmp(token, "end"))     push_token(TOKEN_CODE_END);
+            else                                throw_lexical_error(LEXICAL_ERROR_CODE_INVALID_WORD);
+        }
+        // Checa se token é operador
+        else if(!strcmp(token, "="))            push_token(TOKEN_CODE_SET);
+        else if(!strcmp(token, "+"))            push_token(TOKEN_CODE_ADD);
+        else if(!strcmp(token, "-"))            push_token(TOKEN_CODE_SUB);
+        else if(!strcmp(token, "*"))            push_token(TOKEN_CODE_SET);
+        else if(!strcmp(token, "/"))            push_token(TOKEN_CODE_DIV);
+        else if(!strcmp(token, "%"))            push_token(TOKEN_CODE_MOD);
+        else if(!strcmp(token, "=="))           push_token(TOKEN_CODE_EQU);
+        else if(!strcmp(token, "!="))           push_token(TOKEN_CODE_NEQU);
+        else if(!strcmp(token, ">"))            push_token(TOKEN_CODE_GT);
+        else if(!strcmp(token, "<"))            push_token(TOKEN_CODE_LT);
+        else if(!strcmp(token, ">="))           push_token(TOKEN_CODE_GTE);
+        else if(!strcmp(token, "<="))           push_token(TOKEN_CODE_LTE);
+        else                                    throw_lexical_error(LEXICAL_ERROR_CODE_UNKNOWN);
+        // Desaloca token
+        free(token);
+
+        // Avança para a próxima token
+        advance_token();
     }
 }
