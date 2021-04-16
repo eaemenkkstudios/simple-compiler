@@ -52,11 +52,11 @@ bool push(ARRAY *arr, void *item) {
 // Retorna o último item da array
 void *pop(ARRAY *arr) {
     if(!arr || !arr->length) return NULL;
-    return (arr->buffer)[(arr->length - 1) * sizeof(void*)];
+    return (arr->buffer)[arr->length - 1];
 }
 
 // Retorna o item index da array
 void *get(ARRAY *arr, uint32_t index) {
     if(!arr || index >= arr->length) return NULL;
-    return (arr->buffer)[(index) * sizeof(void*)];
+    return (arr->buffer)[index];
 }

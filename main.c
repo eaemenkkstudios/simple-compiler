@@ -13,6 +13,16 @@
 #include <stdio.h>
 #endif
 
+#ifndef LIMITS_H
+#define LIMITS_H
+#include <stdlib.h>
+#endif
+
+#ifndef STRING_H
+#define STRING_H
+#include <string.h>
+#endif
+
 // Descreve erros léxicos
 char *lexical_error_to_string(LEXICAL_ERROR_CODE code) {
     switch(code) {
@@ -55,45 +65,73 @@ char *syntax_error_to_string(SYNTAX_ERROR_CODE code) {
             return "Multiplas tokens END detectadas.";
         case SYNTAX_ERROR_CODE_END_OF_SENTENCE_EXPECTED:
             return "Final de sentenca esperado.";
+        case SYNTAX_ERROR_CODE_CRESCENT_INDEX_EXPECTED:
+            return "Ordem crescente de indices esperada.";
         default:
             return "Erro de analise sintatica desconhecido.";
     }
+}
+
+// Caminho do arquivo
+char filePath[FILENAME_MAX];
+
+// Define o caminho do arquivo
+void set_file_path(char *file) {
+    filePath[0] = '\0';
+    strcpy(filePath, "./");
+    strcat(filePath, file);
 }
 
 int main(int argc, char **argv) {
     // Aloca arrays de tokens e erros
     tokens = new_array();
     lexicalErrors = new_array();
+    syntaxErrors = new_array();
+
+    // Normaliza o caminho do arquivo
+    set_file_path(argv[1]);
+
     // Buffer de leitura
     char buffer[1024];
     
     // Carrega arquivo
-    FILE *f = fopen(argv[1], "r");
+    FILE *f = fopen(filePath, "r");
+    if(!f) {
+        printf("Arquivo não encontrado: \x1b[1m%s\x1b[0m\n", filePath);
+        return 1;
+    }
 
     // Realiza análise léxica
     while(fgets(buffer, 1024, f)) parse(buffer);
 
-    // Mostrar tokens de análise léxica
+    // // Mostrar tokens de análise léxica
     // for(uint32_t i = 0; i < tokens->length; i++) {
     //     TOKEN *t = get(tokens, i);
     //     printf("%.2u, %.4li, (%u, %u)\n", t->code, t->value, t->position.line, t->position.column);
     // }
 
+    // Realiza análise sintática
+    parse_syntax();
+
     // Mostrar erros de análise léxica
     for(uint32_t i = 0; i < lexicalErrors->length; i++) {
         LEXICAL_ERROR *l = get(lexicalErrors, i);
-        printf("Erro (Lexico): %s Linha: %u, coluna: %u.\n",
-            lexical_error_to_string(l->code),
+        printf("\x1b[1m%s:%u:%u: \x1b[31merro (léxico):\x1b[0m %s\n",
+            filePath,
+            l->position.line,
             l->position.column,
-            l->position.line);
+            lexical_error_to_string(l->code));
     }
 
     // Mostrar erros de análise sintática
     for(uint32_t i = 0; i < syntaxErrors->length; i++) {
         SYNTAX_ERROR *s = get(syntaxErrors, i);
-        printf("Erro (Lexico): %s Linha: %u, coluna: %u.\n",
-            syntax_error_to_string(s->code),
+        printf("\x1b[1m%s:%u:%u: \x1b[31merro (sintático):\x1b[0m %s\n",
+            filePath,
+            ((TOKEN*)get(tokens, s->index))->position.line,
             ((TOKEN*)get(tokens, s->index))->position.column,
-            ((TOKEN*)get(tokens, s->index))->position.line);
+            syntax_error_to_string(s->code));
     }
+
+    return 0;
 }

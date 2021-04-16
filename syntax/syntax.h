@@ -27,25 +27,31 @@
 uint32_t pointer = 0;
 // END encontrado
 bool endFound = false;
+// Último índice de linha
+uint32_t lastLine = -1;
+// Primeiro índice
+bool firstIndex = true;
 // Token atual
-TOKEN t;
+TOKEN token;
 
 // Avança uma instrução
 void advance() {
-    t = *((TOKEN*)get(tokens, ++pointer));
+    token = *((TOKEN*)get(tokens, ++pointer));
 }
 
 // Valida um número
 bool validate_variable(bool crucial) {
-    if(t.code == TOKEN_CODE_VAR)
+    if(token.code == TOKEN_CODE_VAR) {
+        advance();
         return true;
+    }
     if(crucial) throw_syntax_error(SYNTAX_ERROR_CODE_VARIABLE_EXPECTED, pointer);
     return false;
 }
 
 // Valida um operador aritmético
 bool validate_math_operator(bool crucial) {
-    switch(t.code) {
+    switch(token.code) {
         case TOKEN_CODE_ADD:
         case TOKEN_CODE_SUB:
         case TOKEN_CODE_MUL:
@@ -61,7 +67,7 @@ bool validate_math_operator(bool crucial) {
 
 // Valida um operador lógico
 bool validate_logic_operator(bool crucial) {
-    switch(t.code) {
+    switch(token.code) {
         case TOKEN_CODE_EQU:
         case TOKEN_CODE_NEQU:
         case TOKEN_CODE_GT:
@@ -78,7 +84,7 @@ bool validate_logic_operator(bool crucial) {
 
 // Valida uma atribuição
 bool validate_attribuition(bool crucial) {
-    if(t.code == TOKEN_CODE_SET) {
+    if(token.code == TOKEN_CODE_SET) {
         advance();
         return true;
     }
@@ -88,7 +94,7 @@ bool validate_attribuition(bool crucial) {
 
 // Valida um número
 bool validate_number(bool crucial) {
-    if(t.code == TOKEN_CODE_NUM) {
+    if(token.code == TOKEN_CODE_NUM) {
         advance();
         return true;
     }
@@ -105,10 +111,13 @@ bool validate_operand(bool crucial) {
 }
 
 // Valida um índice
-bool validate_index(bool crucial) {
-    if(validate_number(true)) {
+bool validate_index(bool crucial, bool ordered) {
+    TOKEN t = token;
+    if(validate_number(false)) {
         if(t.value < 0)
-            throw_syntax_error(SYNTAX_ERROR_CODE_POSITIVE_NUMBER_EXPECTED, pointer);
+            throw_syntax_error(SYNTAX_ERROR_CODE_POSITIVE_NUMBER_EXPECTED, pointer - 1);
+        else if(ordered && !firstIndex)
+            if(t.value <= lastLine) throw_syntax_error(SYNTAX_ERROR_CODE_CRESCENT_INDEX_EXPECTED, pointer - 1);
         return true;
     }
     if(crucial) throw_syntax_error(SYNTAX_ERROR_CODE_INDEX_EXPECTED, pointer);
@@ -117,9 +126,9 @@ bool validate_index(bool crucial) {
 
 // Valida um goto
 bool validate_goto(bool crucial) {
-    if(t.code == TOKEN_CODE_GOTO) {
+    if(token.code == TOKEN_CODE_GOTO) {
         advance();
-        return validate_index(crucial);
+        return validate_index(crucial, false);
     }
     if(crucial) throw_syntax_error(SYNTAX_ERROR_CODE_GOTO_EXPECTED, pointer);
     return false;
@@ -127,7 +136,8 @@ bool validate_goto(bool crucial) {
 
 // Valida uma palavra reservada
 bool validate_reserved_word(bool crucial) {
-    switch(t.code) {
+    // printf("%u\n", token.code);
+    switch(token.code) {
         case TOKEN_CODE_END:
             if(!endFound) endFound = true;
             else if(crucial) throw_syntax_error(SYNTAX_ERROR_CODE_MULTIPLE_ENDINGS, pointer);
@@ -161,22 +171,27 @@ bool validate_reserved_word(bool crucial) {
     }
 }
 
+// Valida final de sentença
 bool is_end_of_sentence() {
-    return t.code == TOKEN_CODE_ETX || t.code == TOKEN_CODE_LF;
+    return token.code == TOKEN_CODE_ETX || token.code == TOKEN_CODE_LF;
 }
 
+// Realiza análise sintática
 void parse_syntax() {
     // Inicializa token
-    t = *((TOKEN*)get(tokens, pointer));
+    token = *((TOKEN*)get(tokens, pointer));
     while(true) {
         // Verifica índice de linha
-        validate_index(true);
+        validate_index(true, true);
         validate_reserved_word(true);
         if(!is_end_of_sentence()) {
             throw_syntax_error(SYNTAX_ERROR_CODE_END_OF_SENTENCE_EXPECTED, pointer);
             while(!is_end_of_sentence()) advance();
         }
-        if(t.code == TOKEN_CODE_LF) continue;
-        else if(t.code == TOKEN_CODE_ETX) break;
+        if(token.code == TOKEN_CODE_LF) {
+            advance();
+            continue;
+        }
+        else if(token.code == TOKEN_CODE_ETX) break;
     }
 }
