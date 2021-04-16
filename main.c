@@ -27,13 +27,13 @@
 char *lexical_error_to_string(LEXICAL_ERROR_CODE code) {
     switch(code) {
         case LEXICAL_ERROR_CODE_INVALID_NUMBER:
-            return "Numero invalido";
+            return "Número inválido";
         case LEXICAL_ERROR_CODE_INVALID_WORD:
-            return "Palavra reservada invalida.";
+            return "Palavra reservada inválida.";
         case LEXICAL_ERROR_CODE_UNKNOWN:
             return "Token desconhecida.";
         default:
-            return "Erro de analise lexica desconhecido.";
+            return "Erro de análise léxica desconhecido.";
     }
 }
 // Descreve erros sintáticos
@@ -42,33 +42,33 @@ char *syntax_error_to_string(SYNTAX_ERROR_CODE code) {
         case SYNTAX_ERROR_CODE_UNEXPECTED_TOKEN:
             return "Token inesperado.";
         case SYNTAX_ERROR_CODE_INDEX_EXPECTED:
-            return "Indice esperado.";
+            return "Índice esperado.";
         case SYNTAX_ERROR_CODE_POSITIVE_NUMBER_EXPECTED:
-            return "Numero positivo esperado.";
+            return "Número positivo esperado.";
         case SYNTAX_ERROR_CODE_NUMBER_EXPECTED:
-            return "Numero esperado.";
+            return "Número esperado.";
         case SYNTAX_ERROR_CODE_LOGICAL_OPERATOR_EXPECTED:
-            return "Operador logico esperado.";
+            return "Operador lógico esperado.";
         case SYNTAX_ERROR_CODE_MATH_OPERATOR_EXPECTED:
-            return "Operador matematico esperado.";
+            return "Operador matemático esperado.";
         case SYNTAX_ERROR_CODE_OPERAND_EXPECTED:
             return "Operando esperado.";
         case SYNTAX_ERROR_CODE_RESERVED_WORD_EXPECTED:
             return "Palavra reservada esperada.";
         case SYNTAX_ERROR_CODE_ATTRIBUTION_EXPECTED:
-            return "Atribuicao esperada.";
+            return "Atribuição esperada.";
         case SYNTAX_ERROR_CODE_VARIABLE_EXPECTED:
-            return "Variavel esperada.";
+            return "Variável esperada.";
         case SYNTAX_ERROR_CODE_GOTO_EXPECTED:
             return "Goto esperado.";
         case SYNTAX_ERROR_CODE_MULTIPLE_ENDINGS:
-            return "Multiplas tokens END detectadas.";
+            return "Múltiplas tokens END detectadas.";
         case SYNTAX_ERROR_CODE_END_OF_SENTENCE_EXPECTED:
-            return "Final de sentenca esperado.";
+            return "Final de sentença esperado.";
         case SYNTAX_ERROR_CODE_CRESCENT_INDEX_EXPECTED:
-            return "Ordem crescente de indices esperada.";
+            return "Ordem crescente de índices esperada.";
         default:
-            return "Erro de analise sintatica desconhecido.";
+            return "Erro de análise sintática desconhecido.";
     }
 }
 

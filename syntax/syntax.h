@@ -28,7 +28,7 @@ uint32_t pointer = 0;
 // END encontrado
 bool endFound = false;
 // Último índice de linha
-uint32_t lastLine = -1;
+int64_t lastLine = 0;
 // Primeiro índice
 bool firstIndex = true;
 // Token atual
@@ -116,8 +116,13 @@ bool validate_index(bool crucial, bool ordered) {
     if(validate_number(false)) {
         if(t.value < 0)
             throw_syntax_error(SYNTAX_ERROR_CODE_POSITIVE_NUMBER_EXPECTED, pointer - 1);
-        else if(ordered && !firstIndex)
-            if(t.value <= lastLine) throw_syntax_error(SYNTAX_ERROR_CODE_CRESCENT_INDEX_EXPECTED, pointer - 1);
+        if(ordered) {
+            if(crucial && !firstIndex && t.value <= lastLine)
+                throw_syntax_error(SYNTAX_ERROR_CODE_CRESCENT_INDEX_EXPECTED, pointer - 1);
+            lastLine = t.value;
+            firstIndex = false;
+        }
+
         return true;
     }
     if(crucial) throw_syntax_error(SYNTAX_ERROR_CODE_INDEX_EXPECTED, pointer);
@@ -136,7 +141,6 @@ bool validate_goto(bool crucial) {
 
 // Valida uma palavra reservada
 bool validate_reserved_word(bool crucial) {
-    // printf("%u\n", token.code);
     switch(token.code) {
         case TOKEN_CODE_END:
             if(!endFound) endFound = true;
