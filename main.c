@@ -104,7 +104,7 @@ int main(int argc, char **argv) {
     // Realiza análise léxica
     while(fgets(buffer, 1024, f)) parse(buffer);
 
-    // // Mostrar tokens de análise léxica
+    // Mostrar tokens de análise léxica
     // for(uint32_t i = 0; i < tokens->length; i++) {
     //     TOKEN *t = get(tokens, i);
     //     printf("%.2u, %.4li, (%u, %u)\n", t->code, t->value, t->position.line, t->position.column);

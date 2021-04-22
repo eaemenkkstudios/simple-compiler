@@ -104,7 +104,7 @@ NUM_TYPE is_number(char *str) {
         else isNumber = true;
         str++;
     }
-    return NUM_TYPE_NUM;
+    return isNumber ? NUM_TYPE_NUM : NUM_TYPE_NAN;
 }
 
 // Verifica se é uma sequência de letras válida
@@ -178,7 +178,7 @@ void *parse(char *text) {
         else if(!strcmp(currentToken, "="))            push_token(TOKEN_CODE_SET, 0);
         else if(!strcmp(currentToken, "+"))            push_token(TOKEN_CODE_ADD, 0);
         else if(!strcmp(currentToken, "-"))            push_token(TOKEN_CODE_SUB, 0);
-        else if(!strcmp(currentToken, "*"))            push_token(TOKEN_CODE_SET, 0);
+        else if(!strcmp(currentToken, "*"))            push_token(TOKEN_CODE_MUL, 0);
         else if(!strcmp(currentToken, "/"))            push_token(TOKEN_CODE_DIV, 0);
         else if(!strcmp(currentToken, "%"))            push_token(TOKEN_CODE_MOD, 0);
         else if(!strcmp(currentToken, "=="))           push_token(TOKEN_CODE_EQU, 0);

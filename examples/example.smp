@@ -4,5 +4,6 @@
 1300 if x < y goto 2000
 1400 print x
 1500 goto 3000
+1600 let x = x - 1
 2000 print y
 3000 end
