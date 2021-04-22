@@ -3,6 +3,7 @@
         "lexer.h": "c",
         "syntax.h": "c",
         "token.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "string.h": "c"
     }
 }

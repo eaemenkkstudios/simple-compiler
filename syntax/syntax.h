@@ -161,6 +161,7 @@ bool validate_reserved_word(bool crucial) {
                 && validate_operand(crucial)
                 && validate_goto(crucial);
         case TOKEN_CODE_LET:
+            advance();
             if(validate_variable(crucial)
                 && validate_attribuition(crucial)
                 && validate_operand(crucial)) {
