@@ -1,0 +1,15 @@
+10 input n
+14 rem instrucao incorreta
+15 if n <> 0 goto 65
+20 let s = n
+25 let c = 1
+30 input n
+35 if n == 0 goto 55
+39 rem instrucao incorreta
+40 let s = s + n - 1
+45 let c = c + 1
+50 goto 30
+55 let m = s / c
+59 rem instrucao incorreta
+60 escrever m
+65 end

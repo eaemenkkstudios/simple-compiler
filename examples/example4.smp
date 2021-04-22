@@ -1,0 +1,16 @@
+10 input n
+14 rem instrucao incorreta
+15 if n <= 0 goto 54
+19 rem instrucao incorreta
+20 input 10
+25 let n = n - 1
+29 rem instrucao incorreta
+30 if n == 0 va 60
+35 input b
+40 if a >= b goto 25
+44 rem instrucao incorreta
+45 let a = b ^ 5
+50 goto 25
+55 let a = -1
+60 print a
+65 end
