@@ -179,7 +179,7 @@ bool is_end_of_sentence() {
 // Realiza análise sintática
 void parse_syntax() {
     // Inicializa syntaxToken
-    syntaxAdvance();
+    syntaxToken = *((TOKEN*)array_get(tokens, syntaxPointer));
     while(true) {
         // Verifica índice de linha
         validate_index(true, true);

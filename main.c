@@ -110,10 +110,10 @@ int main(int argc, char **argv) {
     while(fgets(buffer, 1024, f)) parse(buffer);
 
     // Mostrar tokens de análise léxica
-    for(uint32_t i = 0; i < tokens->length; i++) {
-        TOKEN *t = array_get(tokens, i);
-        printf("%.2u, %.4i, (%u, %u)\n", t->code, t->value, t->position.line, t->position.column);
-    }
+    // for(uint32_t i = 0; i < tokens->length; i++) {
+    //     TOKEN *t = array_get(tokens, i);
+    //     printf("%.2u, %.4i, (%u, %u)\n", t->code, t->value, t->position.line, t->position.column);
+    // }
 
     // Realiza análise sintática
     parse_syntax();
