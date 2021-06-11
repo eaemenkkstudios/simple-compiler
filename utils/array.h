@@ -27,7 +27,7 @@ typedef struct {
 } ARRAY;
 
 // Instancia uma nova array dinâmica
-ARRAY *new_array() {
+ARRAY *array_new() {
     ARRAY *arr = malloc(sizeof(ARRAY));
     arr->buffer = malloc(sizeof(void*));
     arr->length = 0;
@@ -36,7 +36,7 @@ ARRAY *new_array() {
 }
 
 // Insere um item na array dinâmica
-bool push(ARRAY *arr, void *item) {
+bool array_push(ARRAY *arr, void *item) {
     if(!arr) return false;
     if(arr->length == arr->capacity) {
         arr->capacity *= 2;
@@ -50,13 +50,13 @@ bool push(ARRAY *arr, void *item) {
 }
 
 // Retorna o último item da array
-void *pop(ARRAY *arr) {
+void *array_pop(ARRAY *arr) {
     if(!arr || !arr->length) return NULL;
     return (arr->buffer)[arr->length - 1];
 }
 
 // Retorna o item index da array
-void *get(ARRAY *arr, uint32_t index) {
+void *array_get(ARRAY *arr, uint32_t index) {
     if(!arr || index >= arr->length) return NULL;
     return (arr->buffer)[index];
 }

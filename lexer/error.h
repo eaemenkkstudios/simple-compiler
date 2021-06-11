@@ -5,7 +5,7 @@
 
 #ifndef ARRAY_H
 #define ARRAY_H
-#include "../array.h"
+#include "../utils/array.h"
 #endif
 
 // Códigos de erros
@@ -29,5 +29,5 @@ void throw_lexical_error(LEXICAL_ERROR_CODE code) {
     LEXICAL_ERROR *e = malloc(sizeof(LEXICAL_ERROR));
     e->code = code;
     e->position = cursor;
-    push(lexicalErrors, e);
+    array_push(lexicalErrors, e);
 }

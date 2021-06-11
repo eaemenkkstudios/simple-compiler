@@ -8,13 +8,18 @@
 #include "syntax/syntax.h"
 #endif
 
+#ifndef OBJECT_H
+#define OBJECT_H
+#include "object/object.h"
+#endif
+
 #ifndef STDIO_H
 #define STDIO_H
 #include <stdio.h>
 #endif
 
-#ifndef LIMITS_H
-#define LIMITS_H
+#ifndef STDLIB_H
+#define STDLIB_H
 #include <stdlib.h>
 #endif
 
@@ -84,9 +89,9 @@ void set_file_path(char *file) {
 
 int main(int argc, char **argv) {
     // Aloca arrays de tokens e erros
-    tokens = new_array();
-    lexicalErrors = new_array();
-    syntaxErrors = new_array();
+    tokens = array_new();
+    lexicalErrors = array_new();
+    syntaxErrors = array_new();
 
     // Normaliza o caminho do arquivo
     set_file_path(argv[1]);
@@ -105,17 +110,17 @@ int main(int argc, char **argv) {
     while(fgets(buffer, 1024, f)) parse(buffer);
 
     // Mostrar tokens de análise léxica
-    // for(uint32_t i = 0; i < tokens->length; i++) {
-    //     TOKEN *t = get(tokens, i);
-    //     printf("%.2u, %.4li, (%u, %u)\n", t->code, t->value, t->position.line, t->position.column);
-    // }
+    for(uint32_t i = 0; i < tokens->length; i++) {
+        TOKEN *t = array_get(tokens, i);
+        printf("%.2u, %.4i, (%u, %u)\n", t->code, t->value, t->position.line, t->position.column);
+    }
 
     // Realiza análise sintática
     parse_syntax();
 
     // Mostrar erros de análise léxica
     for(uint32_t i = 0; i < lexicalErrors->length; i++) {
-        LEXICAL_ERROR *l = get(lexicalErrors, i);
+        LEXICAL_ERROR *l = array_get(lexicalErrors, i);
         printf("\x1b[1m%s:%u:%u: \x1b[31merro (léxico):\x1b[0m %s\n",
             filePath,
             l->position.line,
@@ -125,13 +130,21 @@ int main(int argc, char **argv) {
 
     // Mostrar erros de análise sintática
     for(uint32_t i = 0; i < syntaxErrors->length; i++) {
-        SYNTAX_ERROR *s = get(syntaxErrors, i);
+        SYNTAX_ERROR *s = array_get(syntaxErrors, i);
         printf("\x1b[1m%s:%u:%u: \x1b[31merro (sintático):\x1b[0m %s\n",
             filePath,
-            ((TOKEN*)get(tokens, s->index))->position.line,
-            ((TOKEN*)get(tokens, s->index))->position.column,
+            ((TOKEN*)array_get(tokens, s->index))->position.line,
+            ((TOKEN*)array_get(tokens, s->index))->position.column,
             syntax_error_to_string(s->code));
     }
 
+    // if(lexicalErrors->length > 0 || syntaxErrors->length > 0)
+    //     return 1;
+    
+    // parse_object();
+
+    // for(uint32_t i = 0; i < operations->length; i++)
+    //     printf("%s\n", ((char **)operations->buffer)[i]);
+        
     return 0;
 }

@@ -5,7 +5,7 @@
 
 #ifndef ARRAY_H
 #define ARRAY_H
-#include "../array.h"
+#include "../utils/array.h"
 #endif
 
 #ifndef STDIO_H
@@ -55,7 +55,7 @@ typedef enum {
 // Token
 typedef struct {
     TOKEN_CODE  code;
-    int64_t     value;
+    int16_t     value;
     POINT       position;
 } TOKEN;
 
@@ -65,11 +65,11 @@ POINT cursor = {1, 1};
 ARRAY *tokens = NULL;
 
 // Instancia uma token e adiciona à array
-bool push_token(TOKEN_CODE code, int64_t value) {
+bool push_token(TOKEN_CODE code, int16_t value) {
     if(code == TOKEN_CODE_UNKN) return false;
     TOKEN *t = malloc(sizeof(TOKEN));
     t->code = code;
     t->position = cursor;
     t->value = value;
-    return push(tokens, t);
+    return array_push(tokens, t);
 }

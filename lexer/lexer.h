@@ -25,7 +25,7 @@
 
 #ifndef ARRAY_H
 #define ARRAY_H
-#include "../array.h"
+#include "../utils/array.h"
 #endif
 
 #ifndef TOKEN_H

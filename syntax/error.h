@@ -5,7 +5,7 @@
 
 #ifndef ARRAY_H
 #define ARRAY_H
-#include "../array.h"
+#include "../utils/array.h"
 #endif
 
 // Códigos de erros
@@ -24,6 +24,7 @@ typedef enum {
     SYNTAX_ERROR_CODE_MULTIPLE_ENDINGS,
     SYNTAX_ERROR_CODE_END_OF_SENTENCE_EXPECTED,
     SYNTAX_ERROR_CODE_CRESCENT_INDEX_EXPECTED,
+    SYNTAX_ERROR_CODE_VALID_INDEX_EXPECTED,
 } SYNTAX_ERROR_CODE;
 
 // Erro sintático
@@ -40,5 +41,5 @@ void throw_syntax_error(SYNTAX_ERROR_CODE code, uint32_t index) {
     SYNTAX_ERROR *e = malloc(sizeof(SYNTAX_ERROR));
     e->code = code;
     e->index = index;
-    push(syntaxErrors, e);
+    array_push(syntaxErrors, e);
 }
